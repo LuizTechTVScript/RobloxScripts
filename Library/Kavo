@@ -341,6 +341,7 @@ function Kavo.CreateLib(kavName, themeList)
                         ImageTransparency = 0
                     }):Play()
                     isMinimized = false
+                    showButton:Destroy()
                 end
             end)
         end
