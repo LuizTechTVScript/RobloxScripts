@@ -210,7 +210,9 @@ function Kavo.CreateLib(kavName, themeList)
     local infoContainer = Instance.new("Frame")
 
     local blurFrame = Instance.new("Frame")
-
+    
+    local isMinimized;
+    
     Kavo:DraggingEnabled(MainHeader, Main)
 
     blurFrame.Name = "blurFrame"
@@ -290,7 +292,58 @@ function Kavo.CreateLib(kavName, themeList)
         wait(1)
         ScreenGui:Destroy()
     end)
-
+    
+    local minimize = Instance.new("ImageButton")
+    minimize.Name = "minimize"
+    minimize.Parent = MainHeader
+    minimize.BackgroundTransparency = 1
+    minimize.Position = UDim2.new(0.02, 0, 0.137999997, 0)
+    minimize.Size = UDim2.new(0, 21, 0, 21)
+    minimize.ZIndex = 2
+    minimize.Image = "rbxassetid://7072719185"
+    
+    minimize.MouseButton1Click:Connect(function()
+        if not isMinimized then
+            game.TweenService:Create(minimize, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), {
+                ImageTransparency = 1
+            }):Play()
+            game.TweenService:Create(close, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), {
+                ImageTransparency = 1
+            }):Play()
+            game.TweenService:Create(Main, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                Size = UDim2.new(0,0,0,0),
+                Position = UDim2.new(0, Main.AbsolutePosition.X + (Main.AbsoluteSize.X / 2), 0, Main.AbsolutePosition.Y + (Main.AbsoluteSize.Y / 2))
+            }):Play()
+            local showButton = Instance.new("TextButton")
+            showButton.Name = "ShowButton"
+            showButton.Text = "Show"
+            showButton.Parent = ScreenGui
+            showButton.BackgroundColor3 = themeList.Header
+            showButton.Position = UDim2.new(0, 10, 0.5, 0)
+            showButton.Size = UDim2.new(0, 100, 0, 30)
+            showButton.Font = Enum.Font.Gotham
+            showButton.TextColor3 = themeList.TextColor
+            showButton.TextSize = 14
+            
+            showButton.MouseButton1Click:Connect(function()
+                if isMinimized then
+                    game.TweenService:Create(Main, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                        Size = UDim2.new(0, 525, 0, 318),
+                        Position = UDim2.new(0.336503863, 0, 0.275485456, 0)
+                    }):Play()
+                    wait(0.1)
+                    game.TweenService:Create(close, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), {
+                        ImageTransparency = 0
+                    }):Play()
+                    game.TweenService:Create(minimize, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), {
+                        ImageTransparency = 0
+                    }):Play()
+                    isMinimized = false
+                end
+            end)
+        end
+    end)
+    
     MainSide.Name = "MainSide"
     MainSide.Parent = Main
     MainSide.BackgroundColor3 = themeList.Header
