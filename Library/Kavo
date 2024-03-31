@@ -326,6 +326,7 @@ function Kavo.CreateLib(kavName, themeList)
             showButton.Font = Enum.Font.Gotham
             showButton.TextColor3 = themeList.TextColor
             showButton.TextSize = 14
+            showButton.Draggable = true
             
             showButton.MouseButton1Click:Connect(function()
                 if isMinimized then
