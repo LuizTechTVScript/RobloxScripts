@@ -1624,26 +1624,28 @@ do
     local circle = slider.Slider.Bar.Fill.Circle
 
     local value = default or min
-    local dragging = false
 
-    local function updateSlider(value)
-        local percentage = (value - min) / (max - min)
-        local sizeX = slider.Slider.Bar.Size.X.Offset
-        local newX = percentage * sizeX
-        circle.Position = UDim2.new(percentage, 0, 0.5, 0)
-        slider.TextBox.Text = tostring(value)
-        return value
+    local function updateSlider(newValue)
+        local percentage = (newValue - min) / (max - min)
+        local sliderWidth = slider.Slider.Bar.AbsoluteSize.X
+        local newPos = UDim2.new(percentage, 0, 0.5, 0)
+        circle.Position = newPos
+        slider.TextBox.Text = tostring(newValue)
     end
 
     updateSlider(value)
 
-    local function updateValueFromInput(input)
-        local newX = input.Position.X - slider.Slider.Bar.AbsolutePosition.X
-        local percentage = newX / slider.Slider.Bar.Size.X.Offset
-        local newValue = min + percentage * (max - min)
-        newValue = math.clamp(newValue, min, max)
+    local function moveSlider(input)
+        local barAbsoluteSize = slider.Slider.Bar.AbsoluteSize
+        local barLeftEdge = slider.Slider.Bar.AbsolutePosition.X
+        local barRightEdge = barLeftEdge + barAbsoluteSize.X
+
+        local percentage = math.clamp((input.Position.X - barLeftEdge) / barAbsoluteSize.X, 0, 1)
+        local newValue = math.floor(percentage * (max - min) + min)
+
         value = newValue
-        updateSlider(newValue)
+        updateSlider(value)
+
         if callback then
             callback(newValue)
         end
@@ -1651,21 +1653,23 @@ do
 
     slider.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.Touch then
-            dragging = true
-            updateValueFromInput(input)
+            moveSlider(input)
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    input.Changed:Disconnect()
+                end
+            end)
         end
     end)
 
-    slider.InputChanged:Connect(function(input)
-        if dragging and input.UserInputType == Enum.UserInputType.Touch then
-            updateValueFromInput(input)
-        end
-    end)
+    slider.MouseButton1Down:Connect(function(input)
+        moveSlider(input)
 
-    slider.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.Touch then
-            dragging = false
-        end
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                input.Changed:Disconnect()
+            end
+        end)
     end)
 
     textbox.FocusLost:Connect(function()
@@ -1699,7 +1703,7 @@ do
     end)
 
     return slider
-    end
+end
 	
 	function section:addDropdown(title, list, callback)
 		local dropdown = utility:Create("Frame", {
